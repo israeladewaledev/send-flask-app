@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Nile University{% endblock %}
+{% block portal_name %}Admin Portal{% endblock %}
+
+{% block sidebar_nav %}
+<h1 class="text-slate-400 text-xs font-bold uppercase tracking-widest px-3 mb-4">Main Menu</h1>
+<a href="{{ url_for('admin_home') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
+  <span class="material-symbols-outlined">dashboard</span>
+  <span class="text-sm font-medium">Dashboard</span>
+</a>
+<a href="{{ url_for('admin_records') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-all">
+  <span class="material-symbols-outlined">group</span>
+  <span class="text-sm font-medium">Student Records</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+  <header class="mb-8">
+    <h2 class="text-3xl font-bold text-slate-900">Admin Dashboard</h2>
+    <p class="text-slate-500 mt-1">Overview of system activity and statistics.</p>
+  </header>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div class="p-2 bg-blue-50 rounded-lg text-primary">
+          <span class="material-symbols-outlined">group</span>
+        </div>
+      </div>
+      <p class="text-slate-500 text-sm font-medium">Total Students</p>
+      <h3 class="text-3xl font-bold text-slate-900 mt-1">{{ stats.total_students }}</h3>
+    </div>
+
+    <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-amber-500">
+      <div class="flex items-center justify-between mb-4">
+        <div class="p-2 bg-amber-50 rounded-lg text-amber-600">
+          <span class="material-symbols-outlined">pending_actions</span>
+        </div>
+      </div>
+      <p class="text-slate-500 text-sm font-medium">Pending Clearances</p>
+      <h3 class="text-3xl font-bold text-slate-900 mt-1">{{ stats.pending_clearances }}</h3>
+    </div>
+
+    <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div class="p-2 bg-green-50 rounded-lg text-green-600">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+      </div>
+      <p class="text-slate-500 text-sm font-medium">Cleared Today</p>
+      <h3 class="text-3xl font-bold text-slate-900 mt-1">{{ stats.cleared_today }}</h3>
+    </div>
+
+    <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+      <div class="flex items-center justify-between mb-4">
+        <div class="p-2 bg-red-50 rounded-lg text-red-600">
+          <span class="material-symbols-outlined">support_agent</span>
+        </div>
+      </div>
+      <p class="text-slate-500 text-sm font-medium">Open Complaints</p>
+      <h3 class="text-3xl font-bold text-slate-900 mt-1">{{ stats.open_complaints }}</h3>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+      <h3 class="text-lg font-bold text-slate-900 mb-4">Quick Actions</h3>
+      <div class="space-y-3">
+        <a href="{{ url_for('admin_records') }}"
+          class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-outlined text-primary">group</span>
+          <span class="text-sm font-medium text-slate-900">Manage Students</span>
+        </a>
+        <a href="{{ url_for('admin_records') }}"
+          class="flex items-center gap-3 p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+          <span class="material-symbols-outlined text-primary">search</span>
+          <span class="text-sm font-medium text-slate-900">Search Student Records</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+      <h3 class="text-lg font-bold text-slate-900 mb-4">Clearance Trends</h3>
+      <div class="space-y-3">
+        <div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-slate-600">This Week</span>
+            <span class="font-bold text-slate-900">{{ stats.weekly_cleared }} cleared</span>
+          </div>
+          <div class="w-full bg-slate-100 h-2 rounded-full">
+            {% set weekly_pct = [stats.weekly_cleared * 2, 100] | min %}
+            <div class="bg-green-500 h-full rounded-full" style="width:{{ weekly_pct }}%"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-sm mb-1">
+            <span class="text-slate-600">This Month</span>
+            <span class="font-bold text-slate-900">{{ stats.monthly_cleared }} cleared</span>
+          </div>
+          <div class="w-full bg-slate-100 h-2 rounded-full">
+            {% set monthly_pct = [stats.monthly_cleared, 100] | min %}
+            <div class="bg-primary h-full rounded-full" style="width:{{ monthly_pct }}%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Announcements Control -->
+  <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-slate-900">Post System Announcement</h3>
+    </div>
+    <form id="announcement-form" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Title</label>
+        <input type="text" id="ann-title" class="w-full border border-slate-200 rounded-lg p-2 focus:ring-2 focus:ring-primary outline-none" placeholder="E.g., Final Year Clearance Deadline" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Message Content</label>
+        <textarea id="ann-content" rows="3" class="w-full border border-slate-200 rounded-lg p-2 focus:ring-2 focus:ring-primary outline-none" placeholder="Details about the announcement..." required></textarea>
+      </div>
+      <button type="submit" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full sm:w-auto">
+        Publish Announcement
+      </button>
+    </form>
+    
+    <div class="mt-6 border-t border-slate-100 pt-4">
+      <h4 class="text-sm font-bold text-slate-900 mb-3">Active Announcements</h4>
+      <div class="space-y-3">
+        {% if announcements %}
+          {% for ann in announcements %}
+          <div class="flex items-start justify-between gap-4 p-3 bg-slate-50 rounded-lg border border-slate-100">
+            <div>
+              <p class="text-sm font-semibold text-slate-900">{{ ann.title }}</p>
+              <p class="text-xs text-slate-500 mt-1">{{ ann.content }}</p>
+            </div>
+            <span class="text-xs text-slate-400 whitespace-nowrap">{{ ann.created_at[:10] }}</span>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-xs text-slate-500 italic">No announcements found.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- System Audit Logs -->
+  <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+    <h3 class="text-lg font-bold text-slate-900 mb-4">System Audit Logs</h3>
+    <div class="space-y-4" style="max-height: 400px; overflow-y: auto;">
+      {% if logs %}
+        {% for log in logs %}
+        <div class="flex items-start gap-4 pb-4 border-b border-slate-100 last:border-0 last:pb-0">
+          <div class="p-2 {% if log.action_type == 'login' %}bg-blue-50{% elif 'complaint' in log.action_type %}bg-amber-50{% else %}bg-green-50{% endif %} rounded-lg">
+            <span class="material-symbols-outlined {% if log.action_type == 'login' %}text-blue-600{% elif 'complaint' in log.action_type %}text-amber-600{% else %}text-green-600{% endif %} text-sm">
+              {% if log.action_type == 'login' %}login
+              {% elif 'complaint' in log.action_type %}chat
+              {% else %}history{% endif %}
+            </span>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-semibold text-slate-900">
+              {{ log.portal_users.user_id_number }} ({{ log.portal_users.role }})
+            </p>
+            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mt-1">{{ log.action_type.replace('_', ' ') }}</p>
+            {% if log.details %}
+            <p class="text-xs text-slate-400 mt-1 font-mono bg-slate-50 p-1 rounded inline-block">{{ log.details | tojson }}</p>
+            {% endif %}
+            <p class="text-[10px] text-slate-400 mt-1">{{ log.created_at[:16].replace('T', ' ') }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-sm text-slate-500 italic">No activity recorded yet.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Set User Details in base.html
+  document.getElementById('user-name-display').innerText = 'System Administrator';
+  document.getElementById('user-role-display').innerText = 'Root Access';
+  
+  // Handle Announcement Posting
+  document.getElementById('announcement-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('ann-title').value;
+    const content = document.getElementById('ann-content').value;
+    
+    try {
+      const res = await fetch('/api/admin/announcement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Announcement published successfully.');
+        location.reload();
+      } else {
+        alert('Failed to publish announcement.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network error while publishing.');
+    }
+  });
+</script>
+{% endblock %}

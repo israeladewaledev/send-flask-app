@@ -1,0 +1,76 @@
+{% from 'staff/sidebar_macro.html' import staff_sidebar %}
+{% extends "base.html" %}
+
+{% block title %}Skills Registry - {{ unit.name }}{% endblock %}
+{% block portal_name %}Staff Portal{% endblock %}
+
+{% block sidebar_nav %}
+{{ staff_sidebar(unit_key, unit, active_page='skills') }}
+{% endblock %}
+
+{% block content %}
+<header class="mb-8">
+  <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Skills Registry</h2>
+  <p class="text-slate-500 mt-1">Verify completion of the Honoris 21st Century Skills program for graduating students.
+  </p>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-red-500">
+    <p class="text-slate-500 text-sm font-medium">Not Completed</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">6</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-green-500">
+    <p class="text-slate-500 text-sm font-medium">Program Completed</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">148</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+    <p class="text-slate-500 text-sm font-medium">Total Enrollees</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">154</h3>
+  </div>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+  <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+    <h3 class="font-bold text-slate-700 text-sm uppercase tracking-widest">Students Who Have Not Completed the Program
+    </h3>
+    <span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-full">6 Pending</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Student</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Modules Completed</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Progress</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <tr class="hover:bg-slate-50">
+          <td class="px-6 py-4 font-bold text-slate-900">Umar Farouk <span
+              class="text-xs font-mono text-slate-400">NU/CS/2021/0452</span></td>
+          <td class="px-6 py-4 text-slate-600">3 / 5 Modules</td>
+          <td class="px-6 py-4">
+            <div class="w-24 bg-slate-200 h-2 rounded-full">
+              <div class="bg-amber-500 h-2 rounded-full w-[60%]"></div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-right">
+            <button
+              onclick="showConfirm('Grant Exception', 'Grant a completion exception for this student? This should only be done for verified cases.', () => showAlert('Exception Granted', 'The student has been granted a completion waiver for Honoris.'))"
+              class="text-xs font-bold text-primary hover:underline italic">Grant Waiver</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('user-name-display').innerText = '{{ unit.name }}';
+  document.getElementById('user-role-display').innerText = 'Staff · {{ unit.id }}';
+</script>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% from 'staff/sidebar_macro.html' import staff_sidebar %}
+{% extends "base.html" %}
+
+{% block title %}Academic Management - {{ unit.name }}{% endblock %}
+{% block portal_name %}Staff Portal{% endblock %}
+
+{% block sidebar_nav %}
+{{ staff_sidebar(unit_key, unit, active_page='academic') }}
+{% endblock %}
+
+{% block content %}
+<header class="mb-8">
+  <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Academic Management</h2>
+  <p class="text-slate-500 mt-1">Manage course registrations and resolve academic grade issues.</p>
+</header>
+
+<!-- Tabs -->
+<div class="flex border-b border-slate-200 mb-8 overflow-x-auto">
+  <button id="addDropTab" onclick="switchTab('addDrop')"
+    class="px-6 py-3 text-sm font-bold border-b-2 border-primary text-primary whitespace-nowrap">Course Add/Drop
+    Requests</button>
+  <button id="gradeTab" onclick="switchTab('grade')"
+    class="px-6 py-3 text-sm font-medium text-slate-500 hover:text-primary whitespace-nowrap">Missing Grade
+    Resolutions</button>
+</div>
+
+<!-- Course Add/Drop Section -->
+<section id="addDropSection">
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden text-sm">
+    <div class="p-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+      <h3 class="font-bold text-slate-700 uppercase tracking-widest text-[11px]">Pending Requests</h3>
+      <span id="addDropCount" class="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full">4
+        Pending</span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-slate-50/20">
+          <tr>
+            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Student</th>
+            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Type</th>
+            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Course</th>
+            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Reason</th>
+            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody id="addDropTableBody" class="divide-y divide-slate-100"><!-- Dynamic --></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Grade Resolution Section -->
+<section id="gradeSection" class="hidden">
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden text-sm">
+    <div class="p-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
+      <h3 class="font-bold text-slate-700 uppercase tracking-widest text-[11px]">Reported Grade Issues</h3>
+      <span id="gradeCount" class="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full">3 Issues</span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead class="bg-slate-50/20">
+          <tr>
+            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Student</th>
+            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Course</th>
+            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Type</th>
+            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Status</th>
+            <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody id="gradeTableBody" class="divide-y divide-slate-100"><!-- Dynamic --></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let addDropData = [
+    { id: 1, student: 'Mary Uche', type: 'Add', course: 'CSC 401: AI', reason: 'Elective requirement' },
+    { id: 2, student: 'Bala Isa', type: 'Drop', course: 'ENG 202: Ethics', reason: 'Schedule conflict' }
+  ];
+  let gradeData = [
+    { id: 101, student: 'Tunde Bakare', course: 'CSC 302', type: 'Missing Grade', status: 'Pending', msg: 'No script found.' }
+  ];
+
+  function switchTab(tab) {
+    document.getElementById('addDropSection').classList.toggle('hidden', tab !== 'addDrop');
+    document.getElementById('gradeSection').classList.toggle('hidden', tab !== 'grade');
+    document.getElementById('addDropTab').className = tab === 'addDrop' ? 'px-6 py-3 text-sm font-bold border-b-2 border-primary text-primary' : 'px-6 py-3 text-sm font-medium text-slate-500 hover:text-primary';
+    document.getElementById('gradeTab').className = tab === 'grade' ? 'px-6 py-3 text-sm font-bold border-b-2 border-primary text-primary' : 'px-6 py-3 text-sm font-medium text-slate-500 hover:text-primary';
+    tab === 'addDrop' ? renderAddDrop() : renderGrades();
+  }
+
+  function renderAddDrop() {
+    const tbody = document.getElementById('addDropTableBody');
+    tbody.innerHTML = addDropData.map(item => `
+      <tr class="hover:bg-slate-50">
+        <td class="px-6 py-4 font-bold text-slate-900">${item.student}</td>
+        <td class="px-6 py-4"><span class="${item.type === 'Add' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'} text-[10px] font-bold px-2 py-0.5 rounded-full">${item.type}</span></td>
+        <td class="px-6 py-4 text-xs text-slate-600 font-medium">${item.course}</td>
+        <td class="px-6 py-4 text-xs text-slate-400 italic">${item.reason}</td>
+        <td class="px-6 py-4 text-right"><button onclick="resolveAction('addDrop', ${item.id})" class="text-xs font-bold text-primary hover:underline italic">Resolve</button></td>
+      </tr>`).join('');
+    document.getElementById('addDropCount').innerText = `${addDropData.length} Pending`;
+  }
+
+  function renderGrades() {
+    const tbody = document.getElementById('gradeTableBody');
+    tbody.innerHTML = gradeData.map(item => `
+      <tr class="hover:bg-slate-50">
+        <td class="px-6 py-4 font-bold text-slate-900">${item.student}</td>
+        <td class="px-6 py-4 text-xs font-mono font-bold text-slate-600">${item.course}</td>
+        <td class="px-6 py-4 text-xs text-slate-600">${item.type}</td>
+        <td class="px-6 py-4"><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">${item.status}</span></td>
+        <td class="px-6 py-4 text-right"><button onclick="resolveAction('grade', ${item.id})" class="text-xs font-bold text-primary hover:underline italic">Resolve</button></td>
+      </tr>`).join('');
+    document.getElementById('gradeCount').innerText = `${gradeData.length} Issues`;
+  }
+
+  function resolveAction(type, id) {
+    const item = type === 'addDrop' ? addDropData.find(i => i.id === id) : gradeData.find(i => i.id === id);
+    showConfirm('Process Action', `Resolve the ${item.type} request for ${item.student}?`, () => {
+      if (type === 'addDrop') addDropData = addDropData.filter(i => i.id !== id);
+      else gradeData = gradeData.filter(i => i.id !== id);
+      switchTab(type);
+      showAlert('Action Completed', `The ${item.type} request for ${item.student} has been resolved.`);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderAddDrop();
+    document.getElementById('user-name-display').innerText = '{{ unit.name }}';
+    document.getElementById('user-role-display').innerText = 'Staff · {{ unit.id }}';
+  });
+</script>
+{% endblock %}

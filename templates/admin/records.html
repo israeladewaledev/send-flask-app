@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Student Records - Nile University{% endblock %}
+{% block portal_name %}Admin Portal{% endblock %}
+
+{% block sidebar_nav %}
+<h1 class="text-slate-400 text-xs font-bold uppercase tracking-widest px-3 mb-4">Main Menu</h1>
+<a href="{{ url_for('admin_home') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-all">
+  <span class="material-symbols-outlined">dashboard</span>
+  <span class="text-sm font-medium">Dashboard</span>
+</a>
+<a href="{{ url_for('admin_records') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
+  <span class="material-symbols-outlined">group</span>
+  <span class="text-sm font-medium">Student Records</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<header class="mb-8">
+  <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Student Records</h2>
+  <p class="text-slate-500 mt-1">Search and manage student information across all faculties.</p>
+</header>
+
+<!-- Filters -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-6">
+  <div class="p-4 border-b border-slate-200 flex flex-wrap items-center gap-4 bg-slate-50/30">
+    <select id="deptFilter"
+      class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">
+      <option value="all">All Departments</option>
+      <option value="Computer Science">Computer Science</option>
+      <option value="Faculty of Law">Faculty of Law</option>
+      <option value="Mechatronics Eng.">Mechatronics Eng.</option>
+      <option value="Business Admin">Business Admin</option>
+    </select>
+    <select id="levelFilter"
+      class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none">
+      <option value="all">All Levels</option>
+      <option value="100">100 Level</option>
+      <option value="200">200 Level</option>
+      <option value="300">300 Level</option>
+      <option value="400">400 Level</option>
+    </select>
+    <button onclick="applyFilters()"
+      class="ml-auto px-6 py-2 bg-primary hover:bg-[#002855] text-white font-bold text-sm rounded-lg transition-all shadow-md shadow-primary/10">
+      Apply Filters
+    </button>
+  </div>
+
+  <!-- Students Table -->
+  <div class="overflow-x-auto">
+    <table class="w-full text-left">
+      <thead class="bg-slate-50/50">
+        <tr>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Student</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Matric No</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Department</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="studentTableBody" class="divide-y divide-slate-100">
+        <!-- Data populated by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between bg-slate-50/10">
+    <p id="paginationText" class="text-xs text-slate-400 font-medium italic">Showing 0 students</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script id="students-data" type="application/json">
+{{ students | tojson }}
+</script>
+<script>
+  const rawData = JSON.parse(document.getElementById('students-data').textContent);
+  const studentsData = rawData.map(s => ({
+    initials: (s.full_name.split(' ').map(n=>n[0]).join('')).substring(0, 2).toUpperCase() || s.full_name.substring(0, 2).toUpperCase(),
+    name: s.full_name,
+    matric: s.matric_no,
+    dept: s.department,
+    level: s.level,
+    url_id: s.matric_no.replace(/[^a-zA-Z0-9]/g, '')
+  }));
+
+  function renderTable(data) {
+    const tbody = document.getElementById('studentTableBody');
+    tbody.innerHTML = data.length ? data.map(student => `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                        <div class="size-8 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 border border-slate-200">${student.initials}</div>
+                        <span class="text-sm font-semibold text-slate-900">${student.name}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-xs text-slate-600 font-mono italic">${student.matric}</td>
+                <td class="px-6 py-4 text-xs text-slate-500 font-medium">${student.dept}</td>
+                <td class="px-6 py-4 text-right">
+                    <button onclick="window.location.href='/admin/view_profile/' + student.url_id" class="text-xs font-bold text-primary hover:underline italic">View Profile</button>
+                </td>
+            </tr>
+        `).join('') : '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400 italic">No records found.</td></tr>';
+    document.getElementById('paginationText').innerText = `Showing ${data.length} student${data.length !== 1 ? 's' : ''}`;
+
+    // Set User Details
+    document.getElementById('user-name-display').innerText = 'System Administrator';
+    document.getElementById('user-role-display').innerText = 'Root Access';
+  }
+
+  function applyFilters() {
+    const dept = document.getElementById('deptFilter').value;
+    const level = document.getElementById('levelFilter').value;
+    const filtered = studentsData.filter(s => (dept === 'all' || s.dept === dept) && (level === 'all' || s.level === level));
+    renderTable(filtered);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => renderTable(studentsData));
+</script>
+{% endblock %}

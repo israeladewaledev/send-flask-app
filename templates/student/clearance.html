@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Graduation Clearance - Nile University{% endblock %}
+{% block portal_name %}Student Portal{% endblock %}
+
+{% block head %}
+<style>
+  /* Custom Accordion Transition */
+  .accordion-content {
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+
+  .accordion-content.open {
+    max-height: 500px;
+    opacity: 1;
+  }
+</style>
+{% endblock %}
+
+{% block sidebar_nav %}
+<div class="px-3 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Main</div>
+<a href="{{ url_for('student_home') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-all">
+  <span class="material-symbols-outlined">dashboard</span>
+  <span class="text-sm font-medium">Dashboard</span>
+</a>
+<a href="{{ url_for('student_clearance') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
+  <span class="material-symbols-outlined font-fill">assignment_turned_in</span>
+  <span class="text-sm font-medium">My Clearance</span>
+</a>
+<a href="{{ url_for('student_complaints') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-all">
+  <span class="material-symbols-outlined">support_agent</span>
+  <span class="text-sm font-medium">Complaints</span>
+</a>
+
+<div class="px-3 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Account</div>
+<a href="{{ url_for('student_profile') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-all">
+  <span class="material-symbols-outlined">person</span>
+  <span class="text-sm font-medium">Profile</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<header class="flex items-center justify-between mb-8">
+  <div>
+    <h2 class="text-2xl font-bold text-slate-900">Final Clearance</h2>
+    <p class="text-slate-500 text-sm">Complete all steps below to generate your clearance certificate.</p>
+  </div>
+</header>
+
+<!-- Application Header -->
+<div id="application-card"
+  class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+  <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
+  </div>
+  <div>
+    <h3 class="text-xl font-bold text-slate-900">Graduation Clearance Status</h3>
+    <p class="text-sm text-slate-500 mt-1">Submit your graduation clearance request to all 8 university units with one
+      click.</p>
+  </div>
+  <div id="action-area">
+    <button id="apply-all-btn" onclick="applyForAll()"
+      class="px-8 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-[#002855] transition-all transform active:scale-95 flex items-center gap-2">
+      <span class="material-symbols-outlined">send</span> Initiate Graduation Clearance
+    </button>
+  </div>
+</div>
+
+<!-- Progress Card -->
+<div id="progress-card"
+  class="{% if not status_map %}hidden{% endif %} bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-8 relative overflow-hidden">
+  {% set cleared_count = status_map.values()|selectattr('status', 'equalto', 'cleared')|list|length %}
+  {% set total_count = unit_names|length %}
+  {% set progress_percent = (cleared_count / total_count * 100)|int if total_count > 0 else 0 %}
+
+  <div class="flex items-end justify-between mb-2">
+    <div>
+      <span id="global-status-badge"
+        class="text-xs font-bold text-primary bg-blue-50 px-2 py-1 rounded-full mb-2 inline-block">
+        {% if cleared_count == total_count %}Clearance Complete{% else %}Clearance In Progress{% endif %}
+      </span>
+      <h3 class="text-4xl font-bold text-slate-900">{{ progress_percent }}%</h3>
+    </div>
+    <div class="text-right">
+      <p class="text-sm font-medium text-slate-600">{{ cleared_count }} of {{ total_count }} Units Cleared</p>
+    </div>
+  </div>
+  <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+    <div id="progress-bar"
+      class="bg-primary h-full rounded-full w-[{{ progress_percent }}%] transition-all duration-1000 ease-out"></div>
+  </div>
+</div>
+
+<!-- Clearance List -->
+<div id="clearance-list" class="space-y-4 max-w-3xl">
+  {% for key, name in unit_names.items() %}
+  {% set record = status_map.get(key) %}
+  {% set status = record.status if record else 'locked' %}
+
+  <div
+    class="group bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden transition-all hover:border-primary/30">
+    <button onclick="toggleAccordion('{{ key }}')" class="w-full px-6 py-4 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="size-10 rounded-xl flex items-center justify-center 
+            {% if status == 'cleared' %}bg-green-50 text-green-600
+            {% elif status == 'rejected' %}bg-red-50 text-red-600
+            {% elif status == 'pending' %}bg-amber-50 text-amber-600
+            {% else %}bg-slate-50 text-slate-400{% endif %}">
+          <span class="material-symbols-outlined">
+            {% if status == 'cleared' %}check_circle
+            {% elif status == 'rejected' %}cancel
+            {% elif status == 'pending' %}pending
+            {% else %}lock{% endif %}
+          </span>
+        </div>
+        <div class="text-left">
+          <h4 class="font-bold text-slate-900">{{ name }}</h4>
+          <span class="text-[10px] font-bold uppercase tracking-wider 
+              {% if status == 'cleared' %}text-green-600
+              {% elif status == 'rejected' %}text-red-600
+              {% elif status == 'pending' %}text-amber-600
+              {% else %}text-slate-400{% endif %}">
+            {{ status|upper }}
+          </span>
+        </div>
+      </div>
+      <span id="icon-{{ key }}" class="material-symbols-outlined text-slate-400 transition-transform">expand_more</span>
+    </button>
+
+    <div id="content-{{ key }}" class="accordion-content">
+      <div class="px-6 pb-6 pt-2 border-t border-slate-50">
+        <div class="p-4 bg-slate-50 rounded-lg text-sm text-slate-600">
+          {% if status == 'cleared' %}
+          <p class="flex items-center gap-2 text-green-700 font-medium mb-1">
+            <span class="material-symbols-outlined text-sm">verified</span> Verified by Unit Staff
+          </p>
+          <p>Your records have been checked and you are cleared from this unit.</p>
+          {% elif status == 'rejected' %}
+          <p class="flex items-center gap-2 text-red-700 font-medium mb-1">
+            <span class="material-symbols-outlined text-sm">error</span> Rejection Reason:
+          </p>
+          <p class="italic">"{{ record.rejection_reason or 'No reason provided.' }}"</p>
+          <div class="mt-4">
+            <a href="{{ url_for('student_complaints') }}" class="text-primary font-bold hover:underline">Submit Appeal
+              →</a>
+          </div>
+          {% elif status == 'pending' %}
+          <p>Your request is currently being reviewed by the {{ name }}. This usually takes 1-2 business days.</p>
+          {% else %}
+          <p>This unit will become active once you initiate the graduation clearance process.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function toggleAccordion(id) {
+    const content = document.getElementById(`content-${id}`);
+    const icon = document.getElementById(`icon-${id}`);
+    if (!content) return;
+    content.classList.toggle('open');
+    if (content.classList.contains('open')) {
+      icon.style.transform = 'rotate(180deg)';
+    } else {
+      icon.style.transform = 'rotate(0deg)';
+    }
+  }
+
+  async function applyForAll() {
+    const btn = document.getElementById('apply-all-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Initiating...';
+
+    try {
+      const response = await fetch('/api/student/initiate_clearance', { method: 'POST' });
+      const result = await response.json();
+      if (result.success) {
+        location.reload();
+      } else {
+        alert('Failed to initiate clearance. Please try again.');
+        btn.disabled = false;
+        btn.innerText = 'Initiate Graduation Clearance';
+      }
+    } catch (error) {
+      console.error('Initiation error:', error);
+      alert('An error occurred. Check your connection.');
+      btn.disabled = false;
+      btn.innerText = 'Initiate Graduation Clearance';
+    }
+  }
+
+  function initClearance() {
+    // Session is handled by server-side Jinja templates now
+    document.getElementById('user-name-display').innerText = '{{ session.get("user_id_number") }}';
+    document.getElementById('user-role-display').innerText = 'Student Dashboard';
+  }
+
+  document.addEventListener('DOMContentLoaded', initClearance);
+</script>
+{% endblock %}

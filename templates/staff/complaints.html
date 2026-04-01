@@ -1,0 +1,172 @@
+{% from 'staff/sidebar_macro.html' import staff_sidebar %}
+{% extends "base.html" %}
+
+{% block title %}Complaints - {{ unit.name }}{% endblock %}
+{% block portal_name %}Staff Portal{% endblock %}
+
+{% block sidebar_nav %}
+{{ staff_sidebar(unit_key, unit, active_page='complaints') }}
+{% endblock %}
+
+{% block content %}
+<header class="flex items-center justify-between mb-8">
+  <div>
+    <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Manage Complaints</h2>
+    <p class="text-slate-500 mt-1">Review and resolve issues submitted by students — <strong>{{ unit.name }}</strong>.
+    </p>
+  </div>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-amber-500">
+    <p class="text-slate-500 text-sm font-medium">Open Tickets</p>
+    <h3 id="openTicketsCount" class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">2</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-green-500">
+    <p class="text-slate-500 text-sm font-medium">Resolved Today</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">5</h3>
+  </div>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Student</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Subject & Preview</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="complaintsTableBody" class="divide-y divide-slate-100"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Resolve Modal -->
+<div id="resolveModal"
+  class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden opacity-0 transition-opacity duration-300">
+  <div
+    class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200 transform scale-95 transition-transform duration-300"
+    id="resolveModalContent">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <h3 class="font-bold text-slate-900 flex items-center gap-2"><span
+          class="material-symbols-outlined text-primary">support_agent</span> Resolve Complaint</h3>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><span
+          class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="p-6">
+      <div class="mb-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
+        <h4 id="modalStudentName" class="text-sm font-bold text-slate-900 mb-1"></h4>
+        <p id="modalSubject" class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3"></p>
+        <p id="modalMessage" class="text-sm text-slate-700 italic border-l-2 border-slate-300 pl-3 py-1"></p>
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-slate-700 mb-1">Resolution Note <span
+            class="text-red-500">*</span></label>
+        <textarea id="resolutionText" rows="4"
+          class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+          placeholder="Describe the action taken..."></textarea>
+      </div>
+    </div>
+    <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+      <button onclick="closeModal()"
+        class="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-lg">Cancel</button>
+      <button onclick="submitResolution()"
+        class="px-6 py-2 text-sm font-bold text-white bg-green-600 hover:bg-green-700 rounded-lg">Mark as
+        Resolved</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let complaints = [
+    {% for c in complaints %}
+  {
+    id: '{{ c.id }}',
+      student: '{{ c.student_profiles.full_name }} ({{ c.portal_users.user_id_number }})',
+        subject: '{{ c.subject }}',
+          message: '{{ c.message }}',
+            date: '{{ c.created_at[:10] }}'
+  } { { "," if not loop.last else "" } }
+  {% endfor %}
+  ];
+  let currentId = null;
+
+  function renderTable() {
+    const tbody = document.getElementById('complaintsTableBody');
+    document.getElementById('openTicketsCount').innerText = complaints.length;
+
+    if (!complaints.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400 italic">No open complaints at this time.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = complaints.map(c => `
+      <tr class="hover:bg-slate-50 transition-colors">
+        <td class="px-6 py-4 font-bold text-slate-900">${c.student}</td>
+        <td class="px-6 py-4">
+          <p class="text-sm font-bold text-slate-800">${c.subject}</p>
+          <p class="text-xs text-slate-500 max-w-md truncate mt-0.5">${c.message}</p>
+        </td>
+        <td class="px-6 py-4 text-xs font-medium text-slate-500">${c.date}</td>
+        <td class="px-6 py-4 text-right">
+          <button onclick="openModal('${c.id}')" class="text-xs font-bold text-primary hover:underline italic">Resolve</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function openModal(id) {
+    const c = complaints.find(x => x.id === id);
+    if (!c) return;
+    currentId = id;
+    document.getElementById('modalStudentName').innerText = c.student;
+    document.getElementById('modalSubject').innerText = c.subject;
+    document.getElementById('modalMessage').innerText = `"${c.message}"`;
+    document.getElementById('resolutionText').value = '';
+    const modal = document.getElementById('resolveModal');
+    modal.classList.remove('hidden');
+    setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('resolveModalContent').classList.remove('scale-95'); }, 10);
+  }
+
+  function closeModal() {
+    document.getElementById('resolveModal').classList.add('opacity-0');
+    document.getElementById('resolveModalContent').classList.add('scale-95');
+    setTimeout(() => { document.getElementById('resolveModal').classList.add('hidden'); currentId = null; }, 300);
+  }
+
+  async function submitResolution() {
+    const note = document.getElementById('resolutionText').value;
+    if (!note) { showAlert('Input Required', 'Please provide a resolution note.'); return; }
+
+    try {
+      const response = await fetch('/api/staff/resolve_complaint', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ complaint_id: currentId, note: note })
+      });
+      const result = await response.json();
+      if (result.success) {
+        complaints = complaints.filter(c => c.id !== currentId);
+        renderTable();
+        closeModal();
+        showAlert('Resolved', 'Complaint marked as resolved.');
+      } else {
+        showAlert('Error', 'Failed to resolve complaint.');
+      }
+    } catch (error) {
+      console.error('Resolution error:', error);
+      showAlert('Error', 'An error occurred.');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderTable();
+    document.getElementById('user-name-display').innerText = '{{ unit.name }}';
+    document.getElementById('user-role-display').innerText = 'Staff · {{ unit.id }}';
+  });
+</script>
+{% endblock %}

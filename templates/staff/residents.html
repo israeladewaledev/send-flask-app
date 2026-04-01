@@ -1,0 +1,70 @@
+{% from 'staff/sidebar_macro.html' import staff_sidebar %}
+{% extends "base.html" %}
+
+{% block title %}Resident Roster - {{ unit.name }}{% endblock %}
+{% block portal_name %}Staff Portal{% endblock %}
+
+{% block sidebar_nav %}
+{{ staff_sidebar(unit_key, unit, active_page='residents') }}
+{% endblock %}
+
+{% block content %}
+<header class="mb-8">
+  <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Resident Roster</h2>
+  <p class="text-slate-500 mt-1">Verify hostel check-out status for graduating students before granting clearance.</p>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-amber-500">
+    <p class="text-slate-500 text-sm font-medium">Still in Hostel</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">8</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-green-500">
+    <p class="text-slate-500 text-sm font-medium">Checked Out</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">73</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+    <p class="text-slate-500 text-sm font-medium">Total Residents (Graduating)</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">81</h3>
+  </div>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+  <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+    <h3 class="font-bold text-slate-700 text-sm uppercase tracking-widest">Students Still Checked In</h3>
+    <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">8 Pending Check-out</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Student</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Room</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Block</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <tr class="hover:bg-slate-50">
+          <td class="px-6 py-4 font-bold text-slate-900">Chidi Kanu <span
+              class="text-xs font-mono text-slate-400">NU/ENG/2021/0089</span></td>
+          <td class="px-6 py-4 text-slate-600">Room 14B</td>
+          <td class="px-6 py-4 text-slate-600">Block C (Male)</td>
+          <td class="px-6 py-4 text-right">
+            <button
+              onclick="showConfirm('Confirm Check-out', 'Confirm that this student has vacated their room and returned the key?', () => showAlert('Confirmed', 'Check-out confirmed. Student can now be cleared for Hostel.'))"
+              class="text-xs font-bold text-primary hover:underline italic">Confirm Check-out</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('user-name-display').innerText = '{{ unit.name }}';
+  document.getElementById('user-role-display').innerText = 'Staff · {{ unit.id }}';
+</script>
+{% endblock %}

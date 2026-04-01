@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}View Student Profile - Nile University{% endblock %}
+{% block portal_name %}Admin Portal{% endblock %}
+
+{% block sidebar_nav %}
+<h1 class="text-slate-400 text-xs font-bold uppercase tracking-widest px-3 mb-4">Main Menu</h1>
+<a href="{{ url_for('admin_home') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-all">
+  <span class="material-symbols-outlined">dashboard</span>
+  <span class="text-sm font-medium">Dashboard</span>
+</a>
+<a href="{{ url_for('admin_records') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
+  <span class="material-symbols-outlined">group</span>
+  <span class="text-sm font-medium">Student Records</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumbs & Header -->
+<div class="mb-8">
+  <div class="flex items-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
+    <a href="{{ url_for('admin_records') }}" class="hover:text-primary transition-colors">Records</a>
+    <span class="material-symbols-outlined mx-2 text-[14px]">chevron_right</span>
+    <span class="text-slate-600">View Profile</span>
+  </div>
+
+  <div class="flex items-center justify-between">
+    <div class="flex flex-col">
+      <h2 class="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
+        Student Profile
+        <span
+          class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Active</span>
+      </h2>
+      <p class="text-slate-500 mt-1 font-mono text-sm">ID: {{ student_id | default('NU/CS/2021/0452') }}</p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <button onclick="showAlert('Email Sent', 'A password reset link has been emailed to the student.')"
+        class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 transition-all font-bold text-sm">
+        <span class="material-symbols-outlined text-[18px]">lock_reset</span> Reset Password
+      </button>
+      <button
+        onclick="showConfirm('Suspend Account', 'Are you sure you want to suspend this student account? This will revoke their access to the portal.', () => showAlert('Suspended', 'Account suspended successfully.'))"
+        class="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 rounded-xl relative hover:bg-red-100 transition-all font-bold text-sm">
+        <span class="material-symbols-outlined text-[18px]">block</span> Suspend Account
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Main Profile Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+  <!-- Left Column: Personal Data -->
+  <div class="lg:col-span-1 space-y-8">
+
+    <!-- Profile Card -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 flex flex-col items-center text-center">
+      <div
+        class="size-24 rounded-full bg-slate-100 border-4 border-white shadow-lg flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined text-4xl text-slate-400">person</span>
+      </div>
+      <h3 class="text-xl font-bold text-slate-900 mb-1">{{ profile.full_name if profile else student_id }}</h3>
+      <p class="text-primary font-medium text-sm mb-4">{{ profile.department if profile else '—' }}, {{ profile.level if profile else '—' }}L</p>
+
+      <div class="flex gap-2 w-full mt-2">
+        <a href="#"
+          class="flex-1 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors flex items-center justify-center gap-2 text-sm font-bold">
+          <span class="material-symbols-outlined text-[18px]">mail</span> Email
+        </a>
+      </div>
+    </div>
+
+    <!-- Demographics -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+        <h3 class="font-bold text-slate-900 text-sm uppercase tracking-widest">Personal Details</h3>
+      </div>
+      <div class="p-6 space-y-4 text-sm">
+        <div class="flex justify-between border-b border-slate-50 pb-3">
+          <span class="text-slate-500 font-medium">Date of Birth</span>
+          <span class="font-bold text-slate-900">14 Mar, 2000</span>
+        </div>
+        <div class="flex justify-between border-b border-slate-50 pb-3">
+          <span class="text-slate-500 font-medium">Gender</span>
+          <span class="font-bold text-slate-900">Male</span>
+        </div>
+        <div class="flex justify-between border-b border-slate-50 pb-3">
+          <span class="text-slate-500 font-medium">Phone</span>
+          <span class="font-bold text-slate-900">+234 801 234 5678</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500 font-medium">State of Origin</span>
+          <span class="font-bold text-slate-900">Kano</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right Column: Academic & System Data -->
+  <div class="lg:col-span-2 space-y-8">
+
+    <!-- Academic Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-primary">
+        <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">Current CGPA</p>
+        <h3 class="text-3xl font-bold text-slate-900 mt-2 tracking-tight">{{ profile.cgpa if profile else '—' }}</h3>
+        <p class="text-green-600 text-xs font-bold mt-2 flex items-center gap-1"><span
+            class="material-symbols-outlined text-[14px]">trending_up</span> Good Standing</p>
+      </div>
+
+      <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+        <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">Total Credits</p>
+        <h3 class="text-3xl font-bold text-slate-900 mt-2 tracking-tight">{{ profile.credits_earned if profile else '—' }}</h3>
+        <p class="text-slate-400 text-xs font-bold mt-2">/ 144 Required</p>
+      </div>
+
+      <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+        <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">Enrollment Year</p>
+        <h3 class="text-3xl font-bold text-slate-900 mt-2 tracking-tight">2021</h3>
+        <p class="text-slate-400 text-xs font-bold mt-2">Undergraduate</p>
+      </div>
+    </div>
+    <!-- Submitted Documents -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mt-6">
+      <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+        <h3 class="font-bold text-slate-900 text-sm uppercase tracking-widest">Submitted Documents</h3>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {% if documents %}
+            {% for doc in documents %}
+            <div class="flex justify-between items-center bg-slate-50 p-4 rounded-lg border border-slate-100">
+              <div>
+                <p class="text-sm font-semibold text-slate-900">{{ doc.document_name }}</p>
+                <p class="text-xs text-slate-500 mt-1">Uploaded: {{ doc.uploaded_at[:10] }}</p>
+              </div>
+              <a href="{{ doc.file_path }}" target="_blank" class="px-4 py-2 bg-white border border-slate-200 hover:border-primary text-primary font-bold text-xs rounded-lg transition-colors flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">visibility</span> View
+              </a>
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="col-span-full py-4 text-center">
+              <span class="material-symbols-outlined text-slate-300 text-3xl mb-2 block">folder_off</span>
+              <p class="text-sm text-slate-500 italic">No documents have been uploaded by this student.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Clearance History -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+        <h3 class="font-bold text-slate-900 text-sm uppercase tracking-widest">Clearance Status</h3>
+        <span class="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded-md">In Progress</span>
+      </div>
+      <div class="p-6">
+      {% set cleared = clearance_summary.cleared %}
+        {% set total = clearance_summary.total %}
+        {% set pct = ((cleared / total) * 100) | int if total > 0 else 0 %}
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-slate-600 font-bold">Progress ({{ cleared }}/{{ total }} Units Cleared)</span>
+        </div>
+        <div class="w-full bg-slate-100 h-3 rounded-full mb-6 relative overflow-hidden">
+          <div class="bg-green-500 h-full rounded-full absolute top-0 left-0" style="width:{{ pct }}%"></div>
+        </div>
+
+        <div class="grid grid-cols-2 text-sm gap-y-4">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+            <span class="text-slate-700 font-medium">Library</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+            <span class="text-slate-700 font-medium">Bursary / Accounts</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-amber-500 text-lg">schedule</span>
+            <span class="text-slate-700 font-medium">Hostel Management</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+            <span class="text-slate-700 font-medium">Student Services</span>
+          </div>
+        </div>
+        <div class="mt-6 pt-6 border-t border-slate-100 text-right">
+          <a href="{{ url_for('admin_records') }}" class="text-xs font-bold text-primary hover:underline italic">Return
+            to Records</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Set User Details
+  document.getElementById('user-name-display').innerText = 'System Admin';
+  document.getElementById('user-role-display').innerText = 'IT Division';
+</script>
+{% endblock %}

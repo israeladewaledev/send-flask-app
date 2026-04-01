@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - Nile University{% endblock %}
+{% block portal_name %}Student Portal{% endblock %}
+
+{% block sidebar_nav %}
+<div class="px-3 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Main</div>
+<a href="{{ url_for('student_home') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
+  <span class="material-symbols-outlined">dashboard</span>
+  <span class="text-sm font-medium">Dashboard</span>
+</a>
+<a href="{{ url_for('student_clearance') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-all">
+  <span class="material-symbols-outlined">assignment_turned_in</span>
+  <span class="text-sm font-medium">My Clearance</span>
+</a>
+<a href="{{ url_for('student_complaints') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-all">
+  <span class="material-symbols-outlined">support_agent</span>
+  <span class="text-sm font-medium">Complaints</span>
+</a>
+
+<div class="px-3 mt-6 mb-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Account</div>
+<a href="{{ url_for('student_profile') }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 transition-all">
+  <span class="material-symbols-outlined">person</span>
+  <span class="text-sm font-medium">Profile</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<header class="mb-8">
+  <h2 class="text-3xl font-bold text-slate-900">Welcome Back, {{ profile.full_name if profile else 'Student' }}! 👋</h2>
+  <p class="text-slate-500 mt-1">Here's what's happening with your academic journey.</p>
+</header>
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="p-3 bg-blue-50 rounded-lg">
+        <span class="material-symbols-outlined text-primary text-2xl">assignment_turned_in</span>
+      </div>
+      <a href="{{ url_for('student_clearance') }}" class="text-xs font-bold text-primary hover:underline">View →</a>
+    </div>
+    <h3 class="text-sm font-medium text-slate-500 mb-1">Clearance Progress</h3>
+    <p class="text-3xl font-bold text-slate-900" id="progress-percent">{{ progress }}%</p>
+    <div class="w-full bg-slate-100 h-2 rounded-full mt-3 overflow-hidden">
+      <div id="progress-bar-fill"
+        class="bg-primary h-full rounded-full w-[{{ progress }}%] transition-all duration-700"></div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="p-3 bg-amber-50 rounded-lg">
+        <span class="material-symbols-outlined text-amber-600 text-2xl">support_agent</span>
+      </div>
+      <a href="{{ url_for('student_complaints') }}" class="text-xs font-bold text-primary hover:underline">View →</a>
+    </div>
+    <h3 class="text-sm font-medium text-slate-500 mb-1">Active Complaints</h3>
+    <p class="text-3xl font-bold text-slate-900">2</p>
+    <p class="text-xs text-amber-600 mt-2">1 pending response</p>
+  </div>
+
+  <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="p-3 bg-green-50 rounded-lg">
+        <span class="material-symbols-outlined text-green-600 text-2xl">school</span>
+      </div>
+    </div>
+    <h3 class="text-sm font-medium text-slate-500 mb-1">Current CGPA</h3>
+    <p class="text-3xl font-bold text-slate-900">{{ profile.cgpa if profile else '0.00' }}</p>
+    <p class="text-xs text-green-600 mt-2">
+      {% if profile and profile.cgpa >= 4.5 %}First Class Honors
+      {% elif profile and profile.cgpa >= 3.5 %}Second Class Upper
+      {% elif profile and profile.cgpa >= 2.4 %}Second Class Lower
+      {% else %}Academic Standing{% endif %}
+    </p>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm mb-8">
+  <h3 class="text-lg font-bold text-slate-900 mb-4">Quick Actions</h3>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <a href="{{ url_for('student_clearance') }}"
+      class="flex items-center gap-4 p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors group">
+      <div class="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+        <span class="material-symbols-outlined text-primary">upload_file</span>
+      </div>
+      <div>
+        <h4 class="font-bold text-slate-900">Continue Clearance</h4>
+        <p class="text-xs text-slate-500">Check your status</p>
+      </div>
+    </a>
+    <a href="{{ url_for('student_complaints') }}"
+      class="flex items-center gap-4 p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors group">
+      <div class="p-3 bg-amber-50 rounded-lg group-hover:bg-amber-100 transition-colors">
+        <span class="material-symbols-outlined text-amber-600">add_circle</span>
+      </div>
+      <div>
+        <h4 class="font-bold text-slate-900">Submit Complaint</h4>
+        <p class="text-xs text-slate-500">Report an issue</p>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- Recent Announcements -->
+<div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+  <h3 class="text-lg font-bold text-slate-900 mb-4">Official Announcements</h3>
+  <div class="space-y-4">
+    {% if announcements %}
+    {% for ann in announcements %}
+    <div class="flex items-start gap-4 pb-4 border-b border-slate-100 last:border-0 last:pb-0">
+      <div class="p-2 bg-blue-50 rounded-lg">
+        <span class="material-symbols-outlined text-primary text-sm">campaign</span>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-semibold text-slate-900">{{ ann.title }}</p>
+        <p class="text-xs text-slate-500 mt-1">{{ ann.content }}</p>
+        <p class="text-xs text-slate-400 mt-2">{{ ann.created_at[:10] }} &bull; Posted by {{ ann.portal_users.user_id_number or 'Admin' }}</p>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="py-4 text-center">
+      <span class="material-symbols-outlined text-slate-300 text-3xl mb-2 block">notifications_off</span>
+      <p class="text-sm text-slate-500 italic">No official announcements at this time.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Dashboard is now fully server-side rendered via Supabase session and context.
+</script>
+{% endblock %}

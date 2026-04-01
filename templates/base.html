@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Nile University{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: { "primary": "#003366", "background-light": "#f5f7f8" },
+          fontFamily: { "display": ["Inter", "sans-serif"] },
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .sidebar-link.active {
+      @apply bg-primary text-white shadow-lg shadow-primary/20;
+    }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+
+<body class="bg-background-light text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Shared Top Navigation -->
+  <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/80 backdrop-blur-md px-6 py-3">
+    <div class="flex items-center justify-between max-w-[1440px] mx-auto">
+      <div class="flex items-center gap-3">
+        <div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+          <span class="material-symbols-outlined">school</span>
+        </div>
+        <h2 class="text-xl font-bold text-primary">Nile University {% block portal_name %}Portal{% endblock %}</h2>
+      </div>
+      <div class="flex items-center gap-4">
+        <button
+          class="flex items-center justify-center rounded-xl size-10 bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <div class="flex items-center gap-3">
+          <div class="text-right hidden sm:block">
+            <p class="text-xs font-bold text-slate-900" id="user-name-display">{{ session.get('user_id_number', 'User
+              Name') }}</p>
+            <p class="text-[10px] text-slate-500 uppercase" id="user-role-display">{{ session.get('role', 'Role') }}</p>
+          </div>
+          <img src="https://i.pravatar.cc/150?img=5" alt="Avatar" class="size-10 rounded-full border border-slate-200">
+        </div>
+        <a href="{{ url_for('index') }}"
+          class="flex items-center justify-center rounded-xl size-10 bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+          title="Logout">
+          <span class="material-symbols-outlined">logout</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex max-w-[1440px] mx-auto min-h-[calc(100vh-64px)] w-full">
+    <!-- Shared Sidebar -->
+    <aside class="w-64 border-r border-slate-200 p-4 flex flex-col justify-between hidden lg:flex bg-white">
+      <div class="flex flex-col gap-6">
+        <div>
+          <nav class="flex flex-col gap-1">
+            {% block sidebar_nav %}{% endblock %}
+          </nav>
+        </div>
+      </div>
+
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-8">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <!-- Global Custom Modals -->
+  <div id="global-modal"
+    class="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden opacity-0 transition-opacity duration-300">
+    <div id="global-modal-content"
+      class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden border border-slate-200 transform scale-95 transition-transform duration-300">
+      <div class="p-6">
+        <div id="global-modal-icon"
+          class="size-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-2xl" id="global-modal-icon-text">info</span>
+        </div>
+        <h3 id="global-modal-title" class="text-lg font-bold text-slate-900 mb-2">Notice</h3>
+        <p id="global-modal-message" class="text-sm text-slate-500 mb-6 font-medium">Message goes here.</p>
+
+        <div class="flex gap-3" id="global-modal-actions">
+          <button id="global-modal-cancel"
+            class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-all hidden">Cancel</button>
+          <button id="global-modal-confirm"
+            class="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-[#002855] transition-all transform active:scale-95">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showAlert(title, message, callback) {
+      document.getElementById('global-modal-title').innerText = title;
+      document.getElementById('global-modal-message').innerText = message;
+      document.getElementById('global-modal-cancel').classList.add('hidden');
+      document.getElementById('global-modal-icon-text').innerText = 'info';
+
+      const confirmBtn = document.getElementById('global-modal-confirm');
+      confirmBtn.innerText = 'OK';
+      confirmBtn.onclick = () => {
+        closeGlobalModal();
+        if (callback) callback();
+      };
+      openGlobalModal();
+    }
+
+    function showConfirm(title, message, onConfirm, onCancel) {
+      document.getElementById('global-modal-title').innerText = title;
+      document.getElementById('global-modal-message').innerText = message;
+      document.getElementById('global-modal-cancel').classList.remove('hidden');
+      document.getElementById('global-modal-icon-text').innerText = 'help';
+
+      const confirmBtn = document.getElementById('global-modal-confirm');
+      confirmBtn.innerText = 'Confirm';
+      confirmBtn.onclick = () => {
+        closeGlobalModal();
+        if (onConfirm) onConfirm();
+      };
+      document.getElementById('global-modal-cancel').onclick = () => {
+        closeGlobalModal();
+        if (onCancel) onCancel();
+      };
+      openGlobalModal();
+    }
+
+    function openGlobalModal() {
+      const modal = document.getElementById('global-modal');
+      const content = document.getElementById('global-modal-content');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+        content.classList.add('scale-100');
+      }, 10);
+    }
+
+    function closeGlobalModal() {
+      const modal = document.getElementById('global-modal');
+      const content = document.getElementById('global-modal-content');
+      modal.classList.add('opacity-0');
+      content.classList.remove('scale-100');
+      content.classList.add('scale-95');
+      setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+  </script>
+
+  {% block scripts %}{% endblock %}
+</body>
+
+</html>

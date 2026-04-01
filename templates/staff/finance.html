@@ -1,0 +1,70 @@
+{% from 'staff/sidebar_macro.html' import staff_sidebar %}
+{% extends "base.html" %}
+
+{% block title %}Fee Tracker - {{ unit.name }}{% endblock %}
+{% block portal_name %}Staff Portal{% endblock %}
+
+{% block sidebar_nav %}
+{{ staff_sidebar(unit_key, unit, active_page='finance') }}
+{% endblock %}
+
+{% block content %}
+<header class="mb-8">
+  <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Fee Tracker</h2>
+  <p class="text-slate-500 mt-1">Manage outstanding student fee payments required for clearance.</p>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-red-500">
+    <p class="text-slate-500 text-sm font-medium">Students with Outstanding Fees</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">5</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-green-500">
+    <p class="text-slate-500 text-sm font-medium">Fully Paid (Ready to Clear)</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">152</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+    <p class="text-slate-500 text-sm font-medium">Total Fees Collected</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">₦12.4M</h3>
+  </div>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+  <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+    <h3 class="font-bold text-slate-700 text-sm uppercase tracking-widest">Students with Outstanding Fees</h3>
+    <span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-full">5 Unpaid</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Student</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Fee Type</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Amount Owed</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="feeTableBody" class="divide-y divide-slate-100">
+        <tr class="hover:bg-slate-50">
+          <td class="px-6 py-4 font-bold text-slate-900">Bala Isa <span
+              class="text-xs font-mono text-slate-400">NU/ENG/2021/0089</span></td>
+          <td class="px-6 py-4 text-slate-600">Final Year Project Fee</td>
+          <td class="px-6 py-4 font-bold text-red-600">₦25,000</td>
+          <td class="px-6 py-4 text-right">
+            <button
+              onclick="showConfirm('Confirm Payment', 'Has this student paid their outstanding fee?', () => showAlert('Confirmed', 'Payment confirmed. Student can now be cleared for Accounts.'))"
+              class="text-xs font-bold text-primary hover:underline italic">Confirm Payment</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('user-name-display').innerText = '{{ unit.name }}';
+  document.getElementById('user-role-display').innerText = 'Staff · {{ unit.id }}';
+</script>
+{% endblock %}

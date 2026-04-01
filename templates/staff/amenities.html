@@ -1,0 +1,70 @@
+{% from 'staff/sidebar_macro.html' import staff_sidebar %}
+{% extends "base.html" %}
+
+{% block title %}Student Welfare - {{ unit.name }}{% endblock %}
+{% block portal_name %}Staff Portal{% endblock %}
+
+{% block sidebar_nav %}
+{{ staff_sidebar(unit_key, unit, active_page='amenities') }}
+{% endblock %}
+
+{% block content %}
+<header class="mb-8">
+  <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Student Welfare</h2>
+  <p class="text-slate-500 mt-1">Manage welfare requests and student-facing service subscriptions for graduation.</p>
+</header>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-amber-500">
+    <p class="text-slate-500 text-sm font-medium">Open Welfare Requests</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">4</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-green-500">
+    <p class="text-slate-500 text-sm font-medium">Students Cleared (Services)</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">120</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+    <p class="text-slate-500 text-sm font-medium">Pending Review</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">4</h3>
+  </div>
+</div>
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+  <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+    <h3 class="font-bold text-slate-700 text-sm uppercase tracking-widest">Welfare Requests</h3>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Student</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Request Type</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase">Status</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase text-right">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        <tr class="hover:bg-slate-50">
+          <td class="px-6 py-4 font-bold text-slate-900">Fatima Bello <span
+              class="text-xs font-mono text-slate-400">NU/BUS/2022/0112</span></td>
+          <td class="px-6 py-4 text-slate-600">Medical Clearance Letter</td>
+          <td class="px-6 py-4"><span
+              class="text-[10px] font-bold bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full">Pending</span></td>
+          <td class="px-6 py-4 text-right">
+            <button
+              onclick="showConfirm('Approve Welfare Request', 'Approve and issue the medical clearance letter for this student?', () => showAlert('Approved', 'Welfare request approved. Letter has been issued.'))"
+              class="text-xs font-bold text-primary hover:underline italic">Approve</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('user-name-display').innerText = '{{ unit.name }}';
+  document.getElementById('user-role-display').innerText = 'Staff · {{ unit.id }}';
+</script>
+{% endblock %}

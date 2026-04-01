@@ -1,0 +1,289 @@
+{% from 'staff/sidebar_macro.html' import staff_sidebar %}
+{% extends "base.html" %}
+
+{% block title %}Clearance Queue - {{ unit.name }}{% endblock %}
+{% block portal_name %}Staff Portal{% endblock %}
+
+{% block sidebar_nav %}
+{{ staff_sidebar(unit_key, unit, active_page='clearance') }}
+{% endblock %}
+
+{% block head %}
+<style>
+  .modal-backdrop {
+    transition: opacity 0.3s ease;
+  }
+
+  .modal-content {
+    transition: transform 0.3s ease;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="flex items-center justify-between mb-8">
+  <div>
+    <h2 class="text-3xl font-bold text-slate-900 tracking-tight">Clearance Queue</h2>
+    <p class="text-slate-500 mt-1">
+      You are logged in as <strong>{{ unit.name }}</strong>. You may only approve or reject the
+      <strong class="text-primary">{{ unit.name }}</strong> section of each clearance request.
+    </p>
+  </div>
+  <button onclick="resetDemo()"
+    class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-700 hover:bg-slate-50 transition-all font-bold text-sm">
+    <span class="material-symbols-outlined text-sm">refresh</span> Reset Demo
+  </button>
+</header>
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="p-2 bg-blue-50 rounded-lg text-primary"><span
+          class="material-symbols-outlined">data_exploration</span></div>
+      <span class="text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded-full">+12.5%</span>
+    </div>
+    <p class="text-slate-500 text-sm font-medium">Total Requests</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">1,284</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-amber-500">
+    <div class="flex items-center justify-between mb-4">
+      <div class="p-2 bg-amber-50 rounded-lg text-amber-600"><span
+          class="material-symbols-outlined">pending_actions</span></div>
+      <span class="text-amber-600 text-xs font-bold bg-amber-50 px-2 py-1 rounded-full">High Priority</span>
+    </div>
+    <p class="text-slate-500 text-sm font-medium">Pending Review</p>
+    <h3 id="pending-count" class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">0</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="p-2 bg-green-50 rounded-lg text-green-600"><span class="material-symbols-outlined">check_circle</span>
+      </div>
+      <span class="text-slate-400 text-xs font-medium">Today</span>
+    </div>
+    <p class="text-slate-500 text-sm font-medium">Cleared Today</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">156</h3>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full text-left">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Student Name</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Matric No</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Department</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Your Unit Status</th>
+          <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="clearanceTableBody" class="divide-y divide-slate-100">
+        <!-- Populated by JS -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Review Modal -->
+<div id="review-modal"
+  class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 hidden opacity-0 transition-opacity duration-300">
+  <div
+    class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200 transform scale-95 transition-transform duration-300"
+    id="modal-content">
+    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <h3 id="modalTitle" class="font-bold text-slate-900 flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">verified_user</span> Review Request
+      </h3>
+      <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><span
+          class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="p-6">
+      <div class="mb-6 space-y-2">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Student</p>
+        <p id="modalStudentName" class="text-sm font-bold text-slate-900"></p>
+        <p id="modalMatric" class="text-xs font-mono text-slate-500"></p>
+      </div>
+      <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">{{ unit.name }} Section</p>
+        <div id="unitStatusDisplay" class="flex items-center justify-between">
+          <span id="unitStatusText" class="text-sm font-medium text-slate-700">Pending</span>
+          <div class="flex gap-2">
+            <button onclick="approveUnit()"
+              class="px-4 py-2 bg-green-600 text-white text-xs font-bold rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">check</span> Approve
+            </button>
+            <button onclick="showRejectionBox()"
+              class="px-4 py-2 bg-red-50 text-red-600 text-xs font-bold rounded-lg hover:bg-red-100 transition-colors flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">close</span> Reject
+            </button>
+          </div>
+        </div>
+        <div id="rejection-box" class="hidden mt-4">
+          <textarea id="rejectionReason"
+            class="w-full p-3 border border-red-200 bg-red-50 rounded-lg text-sm focus:ring-red-500 focus:border-red-500 resize-none"
+            rows="3" placeholder="Reason for rejection (e.g. Missing library books, unpaid fees...)"></textarea>
+          <div class="flex justify-end mt-2 gap-2">
+            <button onclick="document.getElementById('rejection-box').classList.add('hidden')"
+              class="px-3 py-1.5 text-xs font-bold text-slate-600">Cancel</button>
+            <button onclick="confirmReject()"
+              class="px-4 py-2 bg-red-600 text-white text-xs font-bold rounded-lg hover:bg-red-700">Confirm
+              Rejection</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+      <button onclick="closeModal()"
+        class="px-6 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:bg-white">Close</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const UNIT_KEY = '{{ unit_key }}';
+
+  let queueData = [
+    {% for student in students %}
+  {
+    id: '{{ student.portal_users.id }}',
+      initials: '{{ student.full_name[:1] }}{{ student.full_name.split(" ")[1][:1] if student.full_name.split(" ")|length > 1 else "" }}',
+        name: '{{ student.full_name }}',
+          matric: '{{ student.portal_users.user_id_number }}',
+            dept: '{{ student.department }}',
+              status: '{{ student.clearance_status.status }}'
+  } { { "," if not loop.last else "" } }
+  {% endfor %}
+  ];
+  let currentReviewId = null;
+
+  function renderTable() {
+    const tbody = document.getElementById('clearanceTableBody');
+    tbody.innerHTML = '';
+
+    if (queueData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-slate-500">No pending requests found in the database.</td></tr>';
+      return;
+    }
+
+    queueData.forEach(student => {
+      let badge = '';
+      if (student.status === 'cleared') badge = '<span class="inline-flex items-center gap-1 py-1 px-2.5 rounded-full text-xs font-bold bg-green-50 text-green-700"><span class="size-1.5 rounded-full bg-green-600"></span> Approved</span>';
+      else if (student.status === 'rejected') badge = '<span class="inline-flex items-center gap-1 py-1 px-2.5 rounded-full text-xs font-bold bg-red-50 text-red-700"><span class="size-1.5 rounded-full bg-red-600"></span> Rejected</span>';
+      else badge = '<span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-full text-xs font-bold bg-amber-50 text-amber-600"><span class="size-1.5 rounded-full bg-amber-600"></span> Pending</span>';
+
+      const row = `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="size-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">${student.initials}</div>
+              <span class="text-sm font-semibold text-slate-900">${student.name}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-sm text-slate-600 font-mono">${student.matric}</td>
+          <td class="px-6 py-4 text-sm text-slate-600">${student.dept}</td>
+          <td class="px-6 py-4">${badge}</td>
+          <td class="px-6 py-4 text-right">
+            <button onclick="openModal('${student.id}')" class="bg-primary hover:bg-primary/90 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition-all active:scale-95">Review</button>
+          </td>
+        </tr>`;
+      tbody.innerHTML += row;
+    });
+
+    document.getElementById('pending-count').innerText = queueData.filter(s => s.status === 'pending').length;
+    document.getElementById('user-name-display').innerText = '{{ unit.name }}';
+    document.getElementById('user-role-display').innerText = 'Staff · {{ unit.id }}';
+  }
+
+  function openModal(id) {
+    const student = queueData.find(s => s.id === id);
+    if (!student) return;
+    currentReviewId = id;
+
+    document.getElementById('modalTitle').innerText = 'Review: ' + student.name;
+    document.getElementById('modalStudentName').innerText = student.name;
+    document.getElementById('modalMatric').innerText = student.matric;
+
+    document.getElementById('unitStatusText').innerText = student.status.charAt(0).toUpperCase() + student.status.slice(1);
+    document.getElementById('rejection-box').classList.add('hidden');
+
+    const modal = document.getElementById('review-modal');
+    const content = document.getElementById('modal-content');
+    modal.classList.remove('hidden');
+    setTimeout(() => { modal.classList.remove('opacity-0'); content.classList.remove('scale-95'); }, 10);
+  }
+
+  async function approveUnit() {
+    try {
+      const response = await fetch('/api/staff/update_clearance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          student_id: currentReviewId,
+          unit_key: UNIT_KEY,
+          status: 'cleared',
+          reason: ''
+        })
+      });
+      const result = await response.json();
+      if (result.success) {
+        renderTable();
+        closeModal();
+        showAlert('Section Approved', '{{ unit.name }} clearance has been approved for this student.');
+      } else {
+        showAlert('Error', result.message || 'Failed to update clearance.');
+      }
+    } catch (error) {
+      console.error('Clearance approval error:', error);
+      showAlert('Error', 'An error occurred while connecting to the server.');
+    }
+  }
+
+  function showRejectionBox() {
+    document.getElementById('rejection-box').classList.remove('hidden');
+    document.getElementById('rejectionReason').focus();
+  }
+
+  async function confirmReject() {
+    const reason = document.getElementById('rejectionReason').value;
+    if (!reason) { showAlert('Input Required', 'Please provide a reason for rejection.'); return; }
+
+    try {
+      const response = await fetch('/api/staff/update_clearance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          student_id: currentReviewId,
+          unit_key: UNIT_KEY,
+          status: 'rejected',
+          reason: reason
+        })
+      });
+      const result = await response.json();
+      if (result.success) {
+        renderTable();
+        closeModal();
+        showAlert('Section Rejected', 'The {{ unit.name }} clearance has been rejected.');
+      } else {
+        showAlert('Error', result.message || 'Failed to update clearance.');
+      }
+    } catch (error) {
+      console.error('Clearance rejection error:', error);
+      showAlert('Error', 'An error occurred while connecting to the server.');
+    }
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('review-modal');
+    const content = document.getElementById('modal-content');
+    modal.classList.add('opacity-0');
+    content.classList.add('scale-95');
+    setTimeout(() => { modal.classList.add('hidden'); currentReviewId = null; }, 300);
+  }
+
+  document.addEventListener('DOMContentLoaded', renderTable);
+</script>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% macro staff_sidebar(unit_key, unit, active_page='home') %}
+<h1 class="text-slate-400 text-xs font-bold uppercase tracking-widest px-3 mb-4">{{ unit.name }}</h1>
+
+{# --- Common links for ALL units --- #}
+<a href="{{ url_for('staff_home', unit=unit_key) }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ 'bg-primary text-white shadow-lg shadow-primary/20' if active_page == 'home' else 'text-slate-600 hover:bg-slate-100' }} transition-all">
+  <span class="material-symbols-outlined">dashboard</span>
+  <span class="text-sm font-medium">Dashboard</span>
+</a>
+
+<a href="{{ url_for('staff_clearance', unit=unit_key) }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ 'bg-primary text-white shadow-lg shadow-primary/20' if active_page == 'clearance' else 'text-slate-600 hover:bg-slate-100' }} transition-all">
+  <span class="material-symbols-outlined">assignment_turned_in</span>
+  <span class="text-sm font-medium">Clearance Queue</span>
+</a>
+
+{# --- LIBRARY unit extras --- #}
+{% if unit_key == 'library' %}
+<a href="{{ url_for('staff_inventory', unit=unit_key) }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ 'bg-primary text-white shadow-lg shadow-primary/20' if active_page == 'inventory' else 'text-slate-600 hover:bg-slate-100' }} transition-all">
+  <span class="material-symbols-outlined">auto_stories</span>
+  <span class="text-sm font-medium">Book Inventory</span>
+</a>
+{% endif %}
+
+{# --- ACCOUNTS unit extras --- #}
+{% if unit_key == 'accounts' %}
+<a href="{{ url_for('staff_finance', unit=unit_key) }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ 'bg-primary text-white shadow-lg shadow-primary/20' if active_page == 'finance' else 'text-slate-600 hover:bg-slate-100' }} transition-all">
+  <span class="material-symbols-outlined">account_balance_wallet</span>
+  <span class="text-sm font-medium">Fee Tracker</span>
+</a>
+{% endif %}
+
+{# --- HOSTEL unit extras --- #}
+{% if unit_key == 'hostel' %}
+<a href="{{ url_for('staff_residents', unit=unit_key) }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ 'bg-primary text-white shadow-lg shadow-primary/20' if active_page == 'residents' else 'text-slate-600 hover:bg-slate-100' }} transition-all">
+  <span class="material-symbols-outlined">bed</span>
+  <span class="text-sm font-medium">Resident Roster</span>
+</a>
+{% endif %}
+
+{# --- STUDENT SERVICES unit extras --- #}
+{% if unit_key == 'services' %}
+<a href="{{ url_for('staff_complaints', unit=unit_key) }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ 'bg-primary text-white shadow-lg shadow-primary/20' if active_page == 'complaints' else 'text-slate-600 hover:bg-slate-100' }} transition-all">
+  <span class="material-symbols-outlined">support_agent</span>
+  <span class="text-sm font-medium">Complaints</span>
+</a>
+<a href="{{ url_for('staff_amenities', unit=unit_key) }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ 'bg-primary text-white shadow-lg shadow-primary/20' if active_page == 'amenities' else 'text-slate-600 hover:bg-slate-100' }} transition-all">
+  <span class="material-symbols-outlined">health_and_safety</span>
+  <span class="text-sm font-medium">Student Welfare</span>
+</a>
+{% endif %}
+
+{# --- ACADEMIC DIVISION unit extras --- #}
+{% if unit_key == 'division' %}
+<a href="{{ url_for('staff_academic', unit=unit_key) }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ 'bg-primary text-white shadow-lg shadow-primary/20' if active_page == 'academic' else 'text-slate-600 hover:bg-slate-100' }} transition-all">
+  <span class="material-symbols-outlined">menu_book</span>
+  <span class="text-sm font-medium">Academic Requests</span>
+</a>
+{% endif %}
+
+{# --- CENTRAL STORE unit extras --- #}
+{% if unit_key == 'store' %}
+<a href="{{ url_for('staff_inventory', unit=unit_key) }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ 'bg-primary text-white shadow-lg shadow-primary/20' if active_page == 'inventory' else 'text-slate-600 hover:bg-slate-100' }} transition-all">
+  <span class="material-symbols-outlined">inventory_2</span>
+  <span class="text-sm font-medium">Store Inventory</span>
+</a>
+{% endif %}
+
+{# --- ACADEMIC DEPARTMENT unit extras (most features) --- #}
+{% if unit_key == 'department' %}
+<a href="{{ url_for('staff_academic', unit=unit_key) }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ 'bg-primary text-white shadow-lg shadow-primary/20' if active_page == 'academic' else 'text-slate-600 hover:bg-slate-100' }} transition-all">
+  <span class="material-symbols-outlined">menu_book</span>
+  <span class="text-sm font-medium">Academic Management</span>
+</a>
+<a href="{{ url_for('staff_complaints', unit=unit_key) }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ 'bg-primary text-white shadow-lg shadow-primary/20' if active_page == 'complaints' else 'text-slate-600 hover:bg-slate-100' }} transition-all">
+  <span class="material-symbols-outlined">support_agent</span>
+  <span class="text-sm font-medium">Complaints</span>
+</a>
+{% endif %}
+
+{# --- HONORIS unit extras --- #}
+{% if unit_key == 'honoris' %}
+<a href="{{ url_for('staff_skills', unit=unit_key) }}"
+  class="flex items-center gap-3 px-3 py-2.5 rounded-xl {{ 'bg-primary text-white shadow-lg shadow-primary/20' if active_page == 'skills' else 'text-slate-600 hover:bg-slate-100' }} transition-all">
+  <span class="material-symbols-outlined">workspace_premium</span>
+  <span class="text-sm font-medium">Skills Registry</span>
+</a>
+{% endif %}
+
+{% endmacro %}

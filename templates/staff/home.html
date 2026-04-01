@@ -1,0 +1,105 @@
+{% from 'staff/sidebar_macro.html' import staff_sidebar %}
+{% extends "base.html" %}
+
+{% block title %}{{ unit.name }} - Staff Dashboard{% endblock %}
+{% block portal_name %}Staff Portal{% endblock %}
+
+{% block sidebar_nav %}
+{{ staff_sidebar(unit_key, unit, active_page='home') }}
+{% endblock %}
+
+{% block content %}
+<header class="mb-8">
+  <div class="flex items-center gap-4 mb-2">
+    <div class="size-12 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+      <span class="material-symbols-outlined text-2xl">assured_workload</span>
+    </div>
+    <div>
+      <h2 class="text-3xl font-bold text-slate-900 tracking-tight">{{ unit.name }}</h2>
+      <p class="text-slate-500 mt-0.5 text-sm">Staff Dashboard &mdash; Welcome, logged in as <span
+          class="font-bold text-primary">{{ unit.id }}</span></p>
+    </div>
+  </div>
+</header>
+
+<!-- Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm border-l-4 border-l-amber-500">
+    <div class="flex items-center justify-between mb-4">
+      <div class="p-2 bg-amber-50 rounded-lg text-amber-600"><span
+          class="material-symbols-outlined">pending_actions</span></div>
+      <span class="text-amber-600 text-xs font-bold bg-amber-50 px-2 py-1 rounded-full">High Priority</span>
+    </div>
+    <p class="text-slate-500 text-sm font-medium">Pending Clearances</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">{{ stats.pending }}</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="p-2 bg-green-50 rounded-lg text-green-600"><span class="material-symbols-outlined">check_circle</span>
+      </div>
+      <span class="text-slate-400 text-xs font-medium">This Month</span>
+    </div>
+    <p class="text-slate-500 text-sm font-medium">Cleared by Your Unit</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">{{ stats.cleared }}</h3>
+  </div>
+  <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <div class="p-2 bg-blue-50 rounded-lg text-primary"><span
+          class="material-symbols-outlined">data_exploration</span></div>
+      <span class="text-slate-400 text-xs font-medium">Total</span>
+    </div>
+    <p class="text-slate-500 text-sm font-medium">Total Processed</p>
+    <h3 class="text-3xl font-bold text-slate-900 mt-1 tracking-tight">{{ stats.total_requests }}</h3>
+  </div>
+</div>
+
+
+<!-- Quick Actions -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+  <h3 class="font-bold text-slate-900 mb-4">Quick Actions</h3>
+  <div class="space-y-3">
+    <a href="{{ url_for('staff_clearance', unit=unit_key) }}"
+      class="flex items-center gap-3 p-4 border border-slate-200 rounded-xl hover:bg-primary hover:text-white hover:border-primary group transition-all">
+      <span class="material-symbols-outlined text-primary group-hover:text-white">assignment_turned_in</span>
+      <div>
+        <p class="text-sm font-bold">Review Clearance Requests</p>
+        <p class="text-xs text-slate-500 group-hover:text-white/80">Approve or reject clearances for your unit only</p>
+      </div>
+    </a>
+    {% if unit_key == 'department' %}
+    <a href="{{ url_for('staff_academic', unit=unit_key) }}"
+      class="flex items-center gap-3 p-4 border border-slate-200 rounded-xl hover:bg-primary hover:text-white hover:border-primary group transition-all">
+      <span class="material-symbols-outlined text-primary group-hover:text-white">menu_book</span>
+      <div>
+        <p class="text-sm font-bold">Manage Academic Requests</p>
+        <p class="text-xs text-slate-500 group-hover:text-white/80">Course add/drop and grade resolutions</p>
+      </div>
+    </a>
+    <a href="{{ url_for('staff_complaints', unit=unit_key) }}"
+      class="flex items-center gap-3 p-4 border border-slate-200 rounded-xl hover:bg-primary hover:text-white hover:border-primary group transition-all">
+      <span class="material-symbols-outlined text-primary group-hover:text-white">support_agent</span>
+      <div>
+        <p class="text-sm font-bold">Manage Complaints</p>
+        <p class="text-xs text-slate-500 group-hover:text-white/80">View and resolve student issues</p>
+      </div>
+    </a>
+    {% elif unit_key == 'services' %}
+    <a href="{{ url_for('staff_complaints', unit=unit_key) }}"
+      class="flex items-center gap-3 p-4 border border-slate-200 rounded-xl hover:bg-primary hover:text-white hover:border-primary group transition-all">
+      <span class="material-symbols-outlined text-primary group-hover:text-white">support_agent</span>
+      <div>
+        <p class="text-sm font-bold">Manage Complaints</p>
+        <p class="text-xs text-slate-500 group-hover:text-white/80">Handle student welfare complaints</p>
+      </div>
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('user-name-display').innerText = '{{ unit.name }}';
+  document.getElementById('user-role-display').innerText = 'Staff &bull; {{ unit.id }}';
+</script>
+{% endblock %}
